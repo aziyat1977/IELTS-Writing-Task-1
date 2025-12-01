@@ -1,0 +1,5 @@
+{
+  "name": "IELTS AI Masterclass",
+  "description": "A gamified, AI-powered IELTS Writing Task 1 preparation platform featuring dynamic modes (Student, Teacher, Kahoot, Simulation), personality adaptation, and real-time AI feedback using Gemini.",
+  "requestFramePermissions": []
+}
