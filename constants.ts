@@ -1,29 +1,248 @@
 
-import { SlideData, Personality } from "./types";
-
-export const SLIDES: SlideData[] = [
-  // Module 1: Foundations
-  { id: 0, title: "Course Introduction", category: "Module 1: Foundations", icon: "fa-door-open", type: "theory" },
-  { id: 1, title: "The 4 Pillars", category: "Module 1: Foundations", icon: "fa-columns", type: "theory" },
-  { id: 2, title: "The Perfect Structure", category: "Module 1: Foundations", icon: "fa-layer-group", type: "theory" },
-  
-  // Module 2: The 3 Steps
-  { id: 3, title: "Step 1: The Introduction", category: "Module 2: The 3 Steps", icon: "fa-pen-nib", type: "theory" },
-  { id: 4, title: "Step 2: The Overview", category: "Module 2: The 3 Steps", icon: "fa-binoculars", type: "theory" },
-  { id: 5, title: "Step 3: Body Paragraphs", category: "Module 2: The 3 Steps", icon: "fa-indent", type: "theory" },
-
-  // Module 3: Authentic Practice (2021-2025)
-  { id: 6, title: "Line: Internet Access (2024)", category: "Module 3: Practice Bank", icon: "fa-chart-line", type: "chart" },
-  { id: 7, title: "Bar: Transport Spend (2023)", category: "Module 3: Practice Bank", icon: "fa-chart-simple", type: "chart" },
-  { id: 8, title: "Pie: Energy Sources (2024)", category: "Module 3: Practice Bank", icon: "fa-chart-pie", type: "chart" },
-  
-  // Visual Tasks
-  { id: 9, title: "Process: Olive Oil (2022)", category: "Module 3: Practice Bank", icon: "fa-recycle", type: "theory" },
-  { id: 10, title: "Map: Town Changes (2021)", category: "Module 3: Practice Bank", icon: "fa-map-location-dot", type: "theory" },
-];
+import { SlideData, Personality, AppMode, MapData } from "./types";
 
 export const INITIAL_XP = 0;
 export const LEVEL_THRESHOLD = 100;
+
+// AUTHENTIC MOCK DATASETS
+const LINE_DATA_UK = [
+  { name: '6am', value1: 5, value2: 2 },
+  { name: '10am', value1: 25, value2: 8 },
+  { name: '2pm', value1: 45, value2: 15 },
+  { name: '6pm', value1: 55, value2: 60 },
+  { name: '10pm', value1: 30, value2: 40 },
+  { name: '2am', value1: 5, value2: 5 },
+];
+
+const BAR_DATA_LUXURY = [
+  { name: 'USA', value1: 450, value2: 300 },
+  { name: 'China', value1: 300, value2: 550 },
+  { name: 'Europe', value1: 400, value2: 380 },
+  { name: 'Japan', value1: 200, value2: 220 },
+];
+
+const PIE_DATA_SALES = [
+  { name: 'Electronics', value1: 45 },
+  { name: 'Fashion', value1: 25 },
+  { name: 'Home', value1: 20 },
+  { name: 'Sports', value1: 10 },
+];
+
+const PROCESS_DATA_CHOCOLATE = [
+  { step: 1, label: "Harvesting", description: "Cocoa pods are harvested from cacao trees grown in tropical regions.", icon: "fa-leaf" },
+  { step: 2, label: "Fermenting", description: "Beans are removed and fermented for 5-7 days to develop flavor.", icon: "fa-flask" },
+  { step: 3, label: "Drying", description: "Beans are spread in the sun to dry completely.", icon: "fa-sun" },
+  { step: 4, label: "Roasting", description: "Beans are roasted at high temperatures (120°C).", icon: "fa-fire-burner" },
+  { step: 5, label: "Crushing", description: "Outer shells are removed to extract the inner 'nibs'.", icon: "fa-hammer" },
+  { step: 6, label: "Liquefaction", description: "Nibs are ground into liquid chocolate liquor.", icon: "fa-glass-water" },
+];
+
+const MAP_DATA_VILLAGE: MapData = {
+  year1: 2000,
+  year2: 2024,
+  features: [
+    { name: "Farmland", location: "North", status: "removed" },
+    { name: "Housing Estate", location: "North", status: "new" },
+    { name: "Market Square", location: "Center", status: "unchanged" },
+    { name: "Local School", location: "East", status: "expanded" },
+    { name: "Ferry Port", location: "South (Sea)", status: "new" }
+  ]
+};
+
+export const SLIDES: SlideData[] = [
+  // Module 1: Foundations
+  { 
+    id: 0, 
+    title: "Course Strategy", 
+    category: "Module 1: Foundations", 
+    icon: "fa-chess", 
+    type: "theory",
+    sections: [
+      {
+        heading: "The 'Analyst' Mindset",
+        body: "IELTS Task 1 is not about description; it is about selection. You must act like a Data Analyst.",
+        bullets: [
+          "Do not list every number.",
+          "Group similar data together.",
+          "Identify the 'story' (the main trend)."
+        ]
+      },
+      {
+        heading: "Time Management",
+        body: "You have 20 minutes. Failure to plan is the #1 reason for low scores.",
+        highlight: { type: "tip", text: "Plan: 3 min | Write: 15 min | Check: 2 min" }
+      }
+    ]
+  },
+  { 
+    id: 1, 
+    title: "The 4 Pillars (Band 7+)", 
+    category: "Module 1: Foundations", 
+    icon: "fa-columns", 
+    type: "theory",
+    sections: [
+      {
+        heading: "Task Achievement (TA)",
+        body: "Did you report the 'Main Features'? If you miss the biggest trend, you cannot score above Band 5.",
+        highlight: { type: "warning", text: "Never give your opinion. Stick to the data." }
+      },
+      {
+        heading: "Coherence & Cohesion (CC)",
+        body: "Logical flow. Use linking words naturally, not mechanically.",
+        example: { label: "Good Linker", text: "Turning to the remaining categories..." }
+      },
+      {
+        heading: "Lexical Resource (LR)",
+        body: "Precise vocabulary. Avoid 'big' words if they are wrong. Use collocations.",
+        bullets: ["Increase -> Surge, Rocket, Climb", "Decrease -> Plummet, Dwindle, Dip"]
+      },
+      {
+        heading: "Grammatical Range (GRA)",
+        body: "Use complex sentences (Although X increased, Y remained stable...).",
+      }
+    ]
+  },
+  { 
+    id: 2, 
+    title: "Structure: The 4-Paragraph Model", 
+    category: "Module 1: Foundations", 
+    icon: "fa-layer-group", 
+    type: "theory",
+    sections: [
+      {
+        heading: "Paragraph 1: Introduction",
+        body: "1 sentence. Paraphrase the question prompt."
+      },
+      {
+        heading: "Paragraph 2: Overview",
+        body: "2-3 sentences. The most important paragraph. Summarize the main trends (What is highest? What changed the most?). No numbers here."
+      },
+      {
+        heading: "Paragraph 3: Detail Body A",
+        body: "Group data logically (e.g., all increasing trends). Give specific numbers."
+      },
+      {
+        heading: "Paragraph 4: Detail Body B",
+        body: "The remaining data (e.g., all decreasing trends). Comparisons and contrasts."
+      }
+    ]
+  },
+  
+  // Module 2: The 3 Steps
+  { 
+    id: 3, 
+    title: "Step 1: The Introduction", 
+    category: "Module 2: The 3 Steps", 
+    icon: "fa-pen-nib", 
+    type: "theory",
+    sections: [
+      {
+        heading: "The Art of Paraphrasing",
+        body: "Never copy the question. Change the words and the grammar.",
+        example: { 
+          label: "Transformation", 
+          text: "Question: 'The graph shows data about...'",
+          subtext: "Answer: 'The line graph provides information regarding...'"
+        }
+      },
+      {
+        heading: "Useful Synonyms",
+        body: "Memorize these pairs:",
+        bullets: [
+          "Shows -> Illustrates / Depicts / Highlights",
+          "Information -> Data / Statistics",
+          "Proportion -> Percentage / Share",
+          "From 2000 to 2010 -> Between 2000 and 2010 / Over a decade"
+        ]
+      }
+    ]
+  },
+  { 
+    id: 4, 
+    title: "Step 2: The Overview", 
+    category: "Module 2: The 3 Steps", 
+    icon: "fa-binoculars", 
+    type: "theory",
+    sections: [
+      {
+        heading: "Finding the 'Big Picture'",
+        body: "Imagine looking at the chart from across the room. What do you see? Ignore small details.",
+        highlight: { type: "vocab", text: "Start with: 'Overall, it is immediately apparent that...'" }
+      },
+      {
+        heading: "What to look for",
+        body: "1. Highest/Lowest point throughout.\n2. General Trend (Upward/Downward).\n3. Exceptions/Stability.",
+        example: { label: "Example", text: "Overall, car sales increased significantly, while train usage saw a steady decline." }
+      }
+    ]
+  },
+  { 
+    id: 5, 
+    title: "Step 3: Grouping Data", 
+    category: "Module 2: The 3 Steps", 
+    icon: "fa-indent", 
+    type: "theory",
+    sections: [
+      {
+        heading: "Logic is King",
+        body: "How you divide your body paragraphs determines your Coherence score.",
+        bullets: [
+          "Method A: By Time (e.g., 1990-2000 in Para 1, 2000-2010 in Para 2)",
+          "Method B: By Category (e.g., Increasing items in Para 1, Decreasing items in Para 2)"
+        ]
+      },
+      {
+        heading: "Citation Pattern",
+        body: "Feature + Verb + Number + Time.",
+        example: { label: "Sentence Formula", text: "The price of oil (Feature) peaked (Verb) at $100 (Number) in 2008 (Time)." }
+      }
+    ]
+  },
+
+  // Module 3: Authentic Practice
+  { 
+    id: 6, 
+    title: "Line: TV Audiences (UK)", 
+    category: "Module 3: Practice Bank", 
+    icon: "fa-chart-line", 
+    type: "chart",
+    chartData: LINE_DATA_UK
+  },
+  { 
+    id: 7, 
+    title: "Bar: Luxury Spending", 
+    category: "Module 3: Practice Bank", 
+    icon: "fa-chart-simple", 
+    type: "chart",
+    chartData: BAR_DATA_LUXURY
+  },
+  { 
+    id: 8, 
+    title: "Pie: Online Sales", 
+    category: "Module 3: Practice Bank", 
+    icon: "fa-chart-pie", 
+    type: "chart",
+    chartData: PIE_DATA_SALES
+  },
+  
+  // Visual Tasks
+  { 
+    id: 9, 
+    title: "Process: Making Chocolate", 
+    category: "Module 3: Practice Bank", 
+    icon: "fa-recycle", 
+    type: "process",
+    processData: PROCESS_DATA_CHOCOLATE
+  },
+  { 
+    id: 10, 
+    title: "Map: Isola Village", 
+    category: "Module 3: Practice Bank", 
+    icon: "fa-map-location-dot", 
+    type: "map",
+    mapData: MAP_DATA_VILLAGE
+  },
+];
 
 // NEW: Surgical Theme Configuration
 export const THEME = {

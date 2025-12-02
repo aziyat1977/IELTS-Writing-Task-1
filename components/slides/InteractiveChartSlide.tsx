@@ -1,14 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Legend, AreaChart, Area
+  LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Legend, AreaChart, Area, PieChart, Pie, Cell
 } from 'recharts';
-import { Personality } from '../../types';
+import { Personality, ChartDataPoint, ProcessStep, MapData } from '../../types';
 import { THEME } from '../../constants';
 
 interface Props {
-  type: 'line' | 'bar';
-  data: any[];
+  type: 'chart' | 'map' | 'process';
+  data?: any;
   title: string;
   onAction: () => void;
   personality: Personality;
@@ -31,6 +31,8 @@ interface Exercise {
   options: ExerciseOption[];
 }
 
+const COLORS = ['#f59e0b', '#3b82f6', '#10b981', '#ef4444'];
+
 const InteractiveChartSlide: React.FC<Props> = ({ type, data, title, onAction, personality }) => {
   const [activeTab, setActiveTab] = useState<'intro' | 'overview'>('intro');
   const [exercises, setExercises] = useState<{ intro: Exercise[]; overview: Exercise[] }>({ intro: [], overview: [] });
@@ -51,30 +53,21 @@ const InteractiveChartSlide: React.FC<Props> = ({ type, data, title, onAction, p
     setCompletedIds(new Set());
     setActiveTab('intro');
 
-    // Generic Exercises applicable to any chart
+    // Generate Context-Aware Exercises
+    const isProcess = type === 'process';
+    const isMap = type === 'map';
+
     const introExs: Exercise[] = [
       {
         id: 'i1',
         type: 'fill-blank',
-        prompt: 'Task 1 Introduction: Select the most precise academic verb.',
-        beforeText: `The ${type === 'line' ? 'line graph' : 'chart'}`,
-        afterText: 'data regarding the changes in specific categories over the given period.',
+        prompt: 'Introduction: Select the most precise academic verb.',
+        beforeText: `The ${isProcess ? 'diagram' : isMap ? 'map' : 'chart'}`,
+        afterText: isProcess ? 'the linear stages in the production of the item.' : 'information regarding the changes.',
         options: shuffle([
-          { id: 'opt1', text: 'illustrates', isCorrect: true },
+          { id: 'opt1', text: isProcess ? 'delineates' : 'illustrates', isCorrect: true },
           { id: 'opt2', text: 'talks about', isCorrect: false },
           { id: 'opt3', text: 'shows up', isCorrect: false }
-        ])
-      },
-      {
-        id: 'i2',
-        type: 'fill-blank',
-        prompt: 'Prepositions of Time: Choose the correct structure.',
-        beforeText: 'Data is provided for the period',
-        afterText: 'the initial year and the final year.',
-        options: shuffle([
-          { id: 'opt1', text: 'between', isCorrect: true },
-          { id: 'opt2', text: 'from', isCorrect: false },
-          { id: 'opt3', text: 'since', isCorrect: false }
         ])
       }
     ];
@@ -83,16 +76,18 @@ const InteractiveChartSlide: React.FC<Props> = ({ type, data, title, onAction, p
       {
         id: 'o1',
         type: 'mcq',
-        prompt: 'The Overview Paragraph: Identify the correct style.',
+        prompt: isProcess ? 'Overview: Identify the start and end.' : 'Overview: Identify the main trend.',
         options: shuffle([
           { 
             id: 'opt1', 
-            text: 'Overall, it is clear that there were significant fluctuations, with most categories showing an upward trend.', 
+            text: isProcess 
+              ? 'Overall, there are several steps, beginning with raw collection and ending with the final product.' 
+              : 'Overall, it is clear that there were significant fluctuations, with most categories showing an upward trend.', 
             isCorrect: true 
           },
           { 
             id: 'opt2', 
-            text: 'In the first year, the value was 50, which increased to 100 in the final year.', 
+            text: 'It starts at 5 and ends at 100.', 
             isCorrect: false 
           }
         ])
@@ -141,6 +136,136 @@ const InteractiveChartSlide: React.FC<Props> = ({ type, data, title, onAction, p
     }));
   };
 
+  // --- RENDERERS ---
+
+  const renderChart = () => {
+    // Determine specific chart type from title
+    const isLine = title.includes('Line');
+    const isBar = title.includes('Bar');
+    const isPie = title.includes('Pie');
+    
+    return (
+      <ResponsiveContainer width="100%" height="100%">
+        {isLine ? (
+          <AreaChart data={data as ChartDataPoint[]} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+            <defs>
+              <linearGradient id="colorV1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.2}/>
+                <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray={personality === Personality.INTROVERT ? "1 1" : "3 3"} stroke={personality === Personality.INTROVERT ? "#334155" : "#e2e8f0"} vertical={false} />
+            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12, fontWeight: 600}} dy={15} />
+            <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12, fontWeight: 600}} dx={-10} />
+            <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', padding: '16px', backgroundColor: 'rgba(255, 255, 255, 0.95)' }} />
+            <Legend wrapperStyle={{ paddingTop: '30px' }} iconType="circle" />
+            <Area type="monotone" name="Variable A" dataKey="value1" stroke="#f59e0b" strokeWidth={3} fillOpacity={1} fill="url(#colorV1)" dot={{r: 4, fill: '#f59e0b', strokeWidth: 2, stroke: '#fff'}} />
+            <Area type="monotone" name="Variable B" dataKey="value2" stroke={personality === Personality.INTROVERT ? "#818cf8" : "#1e293b"} strokeWidth={3} fillOpacity={0} dot={{r: 4}} />
+          </AreaChart>
+        ) : isBar ? (
+          <BarChart data={data as ChartDataPoint[]} margin={{ top: 20, right: 30, left: 20, bottom: 20 }} barGap={8}>
+            <CartesianGrid strokeDasharray="3 3" stroke={personality === Personality.INTROVERT ? "#334155" : "#e2e8f0"} vertical={false} />
+            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12, fontWeight: 600}} dy={15} />
+            <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12, fontWeight: 600}} dx={-10} />
+            <Tooltip cursor={{fill: '#f1f5f9', radius: 4}} contentStyle={{ borderRadius: '12px', border: 'none' }} />
+            <Legend wrapperStyle={{ paddingTop: '30px' }} iconType="circle" />
+            <Bar name="Value 1" dataKey="value1" fill="#f59e0b" radius={[6, 6, 0, 0]} barSize={30} />
+            <Bar name="Value 2" dataKey="value2" fill={personality === Personality.INTROVERT ? "#818cf8" : "#1e293b"} radius={[6, 6, 0, 0]} barSize={30} />
+          </BarChart>
+        ) : (
+          <PieChart>
+             <Pie
+              data={data as ChartDataPoint[]}
+              cx="50%"
+              cy="50%"
+              innerRadius={60}
+              outerRadius={100}
+              fill="#8884d8"
+              paddingAngle={5}
+              dataKey="value1"
+            >
+              {(data as ChartDataPoint[]).map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              ))}
+            </Pie>
+            <Tooltip />
+            <Legend />
+          </PieChart>
+        )}
+      </ResponsiveContainer>
+    );
+  };
+
+  const renderProcess = () => {
+    const steps = data as ProcessStep[];
+    return (
+      <div className="h-full overflow-y-auto pr-2 scrollbar-thin">
+        <div className="flex flex-col items-center gap-4 py-4">
+          {steps.map((step, idx) => (
+            <React.Fragment key={idx}>
+              <div className={`relative w-full p-4 rounded-xl border flex items-center gap-4 hover:scale-105 transition-transform cursor-default ${personality === Personality.INTROVERT ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200 shadow-sm'}`}>
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold flex-shrink-0 ${personality === Personality.INTROVERT ? 'bg-indigo-900 text-indigo-300' : 'bg-orange-100 text-orange-600'}`}>
+                  <i className={`fa-solid ${step.icon}`}></i>
+                </div>
+                <div>
+                  <div className="text-xs uppercase font-bold opacity-50 tracking-wider">Step {step.step}</div>
+                  <h4 className={`font-bold ${theme.textPrimary}`}>{step.label}</h4>
+                  <p className={`text-xs mt-1 ${theme.textSecondary}`}>{step.description}</p>
+                </div>
+              </div>
+              {idx < steps.length - 1 && (
+                <i className={`fa-solid fa-arrow-down text-2xl animate-bounce ${personality === Personality.INTROVERT ? 'text-slate-700' : 'text-slate-300'}`}></i>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderMap = () => {
+    const mapData = data as MapData;
+    return (
+      <div className="h-full flex flex-col gap-4">
+        {[mapData.year1, mapData.year2].map((year, yearIdx) => (
+          <div key={year} className={`flex-1 relative rounded-xl border overflow-hidden p-4 ${personality === Personality.INTROVERT ? 'bg-slate-800 border-slate-700' : 'bg-green-50/50 border-green-100'}`}>
+            <span className="absolute top-2 left-3 font-bold bg-white/80 px-2 py-1 rounded text-xs shadow-sm text-black">Year {year}</span>
+            
+            {/* Simple Grid Map Simulation */}
+            <div className="grid grid-cols-3 grid-rows-2 gap-2 h-full mt-4">
+              {mapData.features.map((feat, idx) => {
+                // Determine if this feature exists in this year
+                const exists = yearIdx === 1 || feat.status === 'unchanged' || feat.status === 'removed';
+                const isNewInYear2 = yearIdx === 1 && feat.status === 'new';
+                const isRemovedInYear2 = yearIdx === 1 && feat.status === 'removed';
+                
+                if (!exists || isRemovedInYear2) return <div key={idx} className="bg-transparent border-2 border-dashed border-slate-300/20 rounded"></div>;
+
+                let color = "bg-slate-400";
+                if (feat.name.includes("Farm")) color = "bg-green-300";
+                if (feat.name.includes("House")) color = "bg-orange-300";
+                if (feat.name.includes("School")) color = "bg-blue-300";
+                if (feat.name.includes("Port")) color = "bg-cyan-300";
+
+                return (
+                  <div key={idx} className={`${color} rounded-lg flex flex-col items-center justify-center text-center p-1 shadow-sm relative group`}>
+                     <i className="fa-solid fa-location-dot text-black/20 text-3xl mb-1"></i>
+                     <span className="text-[10px] font-bold text-slate-900 leading-tight">{feat.name}</span>
+                     {yearIdx === 1 && feat.status !== 'unchanged' && (
+                       <span className={`absolute -top-1 -right-1 text-[8px] font-bold text-white px-1 rounded ${feat.status === 'expanded' ? 'bg-blue-600' : 'bg-red-500'}`}>
+                         {feat.status === 'expanded' ? '+' : 'NEW'}
+                       </span>
+                     )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   const currentList = activeTab === 'intro' ? exercises.intro : exercises.overview;
   const currentIndex = activeTab === 'intro' ? currentIndices.intro : currentIndices.overview;
   const currentExercise = currentList[currentIndex];
@@ -150,13 +275,13 @@ const InteractiveChartSlide: React.FC<Props> = ({ type, data, title, onAction, p
   return (
     <div className="h-full flex flex-col gap-6 p-8 overflow-y-auto">
       
-      {/* Enhanced Header */}
+      {/* Header */}
       <div className={`flex flex-col md:flex-row justify-between items-end border-b pb-6 gap-4 ${personality === Personality.INTROVERT ? 'border-slate-800' : 'border-slate-200/60'}`}>
          <div>
             <h2 className={`text-3xl md:text-4xl font-bold tracking-tight ${theme.fontHead} ${theme.textPrimary}`}>{title}</h2>
             <div className="flex items-center gap-3 mt-2">
-              <span className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider text-white ${type === 'line' ? 'bg-blue-500' : 'bg-orange-500'}`}>
-                {type === 'line' ? 'Dynamic' : 'Static'}
+              <span className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider text-white bg-accent`}>
+                {type === 'process' ? 'Process' : type === 'map' ? 'Map' : 'Chart'}
               </span>
               <p className={`font-medium text-sm ${theme.textSecondary}`}>Analyze data patterns and report features.</p>
             </div>
@@ -179,60 +304,22 @@ const InteractiveChartSlide: React.FC<Props> = ({ type, data, title, onAction, p
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 flex-1 min-h-[500px]">
         
-        {/* Left: Enhanced Chart Visuals */}
-        <div className={`flex flex-col relative overflow-hidden group p-8 ${theme.cardBg} ${theme.radius}`}>
-          {personality !== Personality.INTROVERT && (
-             <div className="absolute inset-0 bg-gradient-to-br from-slate-50 to-white z-0 opacity-50"></div>
-          )}
-          
-          <div className="flex-1 z-10 relative">
-            <ResponsiveContainer width="100%" height="100%">
-              {type === 'line' ? (
-                <AreaChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                  <defs>
-                    <linearGradient id="colorV1" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.2}/>
-                      <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray={personality === Personality.INTROVERT ? "1 1" : "3 3"} stroke={personality === Personality.INTROVERT ? "#334155" : "#e2e8f0"} vertical={false} />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12, fontWeight: 600}} dy={15} />
-                  <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12, fontWeight: 600}} dx={-10} />
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', padding: '16px', backgroundColor: 'rgba(255, 255, 255, 0.95)' }} 
-                  />
-                  <Legend wrapperStyle={{ paddingTop: '30px' }} iconType="circle" />
-                  <Area type="monotone" name="Category A" dataKey="value1" stroke="#f59e0b" strokeWidth={3} fillOpacity={1} fill="url(#colorV1)" dot={{r: 4, fill: '#f59e0b', strokeWidth: 2, stroke: '#fff'}} />
-                  <Area type="monotone" name="Category B" dataKey="value2" stroke={personality === Personality.INTROVERT ? "#818cf8" : "#1e293b"} strokeWidth={3} fillOpacity={0} dot={{r: 4}} />
-                </AreaChart>
-              ) : (
-                <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 20 }} barGap={8}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={personality === Personality.INTROVERT ? "#334155" : "#e2e8f0"} vertical={false} />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12, fontWeight: 600}} dy={15} />
-                  <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12, fontWeight: 600}} dx={-10} />
-                  <Tooltip cursor={{fill: '#f1f5f9', radius: 4}} contentStyle={{ borderRadius: '12px', border: 'none' }} />
-                  <Legend wrapperStyle={{ paddingTop: '30px' }} iconType="circle" />
-                  <Bar name="Item 1" dataKey="value1" fill="#f59e0b" radius={[6, 6, 0, 0]} barSize={30} />
-                  <Bar name="Item 2" dataKey="value2" fill={personality === Personality.INTROVERT ? "#818cf8" : "#1e293b"} radius={[6, 6, 0, 0]} barSize={30} />
-                </BarChart>
-              )}
-            </ResponsiveContainer>
+        {/* Left: Enhanced Visuals */}
+        <div className={`flex flex-col relative overflow-hidden group p-8 ${theme.cardBg} ${theme.radius} h-[500px]`}>
+          <div className="flex-1 z-10 relative h-full">
+            {type === 'process' ? renderProcess() : type === 'map' ? renderMap() : renderChart()}
           </div>
         </div>
 
         {/* Right: Interaction Zone */}
         <div className="flex flex-col gap-5">
-           
-           {/* Progress Indicator */}
            <div className="flex justify-between items-center px-1">
              <span className={`text-[11px] font-bold uppercase tracking-[0.2em] ${theme.textSecondary}`}>
                Exercise {currentIndex + 1} / {currentList.length}
              </span>
            </div>
 
-           {/* Enhanced Card */}
            <div className={`p-8 flex-1 flex flex-col relative overflow-hidden group hover:shadow-2xl transition-all duration-500 ${theme.cardBg} ${theme.radius}`}>
-              
               <div className="flex-1 animate-scale-in" key={currentExercise.id}>
                  <div className="flex items-center gap-3 mb-6">
                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-serif font-bold italic ${personality === Personality.INTROVERT ? 'bg-indigo-900 text-indigo-300' : 'bg-slate-100 text-slate-500'}`}>

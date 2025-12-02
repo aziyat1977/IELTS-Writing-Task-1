@@ -9,28 +9,6 @@ import KahootMode from './components/KahootMode';
 import { SLIDES, LEVEL_THRESHOLD, THEME } from './constants';
 import { AppMode, Personality, UserState } from './types';
 
-// Authentic Mock Data (2024-2023 Scenarios)
-const LINE_DATA_2024 = [ // Internet Access %
-  { name: '1999', value1: 10, value2: 5, value3: 20 },
-  { name: '2004', value1: 25, value2: 15, value3: 40 },
-  { name: '2009', value1: 60, value2: 35, value3: 65 },
-  { name: '2014', value1: 85, value2: 60, value3: 75 },
-  { name: '2019', value1: 95, value2: 85, value3: 80 },
-  { name: '2024', value1: 98, value2: 95, value3: 82 },
-];
-
-const BAR_DATA_2023 = [ // Transport Spending (Billions)
-  { name: 'Road', value1: 50, value2: 45, value3: 30 },
-  { name: 'Rail', value1: 30, value2: 60, value3: 55 },
-  { name: 'Air', value1: 20, value2: 25, value3: 15 },
-];
-
-const PIE_DATA_2024 = [ // Energy Sources
-  { name: 'Fossil', value1: 60, value2: 0, value3: 0 },
-  { name: 'Nuclear', value1: 25, value2: 0, value3: 0 },
-  { name: 'Renewables', value1: 15, value2: 0, value3: 0 },
-];
-
 const App: React.FC = () => {
   const [activeSlideId, setActiveSlideId] = useState(0);
   const [userState, setUserState] = useState<UserState>({
@@ -68,11 +46,10 @@ const App: React.FC = () => {
     }
   };
 
-  const getChartData = () => {
-    if (currentSlide.title.includes('Line')) return LINE_DATA_2024;
-    if (currentSlide.title.includes('Bar')) return BAR_DATA_2023;
-    if (currentSlide.title.includes('Pie')) return PIE_DATA_2024;
-    return LINE_DATA_2024;
+  const getSlideData = () => {
+    if (currentSlide.type === 'process') return currentSlide.processData;
+    if (currentSlide.type === 'map') return currentSlide.mapData;
+    return currentSlide.chartData;
   };
 
   return (
@@ -125,8 +102,8 @@ const App: React.FC = () => {
             />
           ) : (
             <InteractiveChartSlide 
-              type={currentSlide.title.includes('Line') ? 'line' : 'bar'} 
-              data={getChartData()}
+              type={currentSlide.type as 'chart' | 'map' | 'process'}
+              data={getSlideData()}
               title={currentSlide.title}
               onAction={() => handleXP(20)}
               personality={userState.personality}
