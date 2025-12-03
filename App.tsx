@@ -16,7 +16,7 @@ const App: React.FC = () => {
     level: 1,
     streak: 3,
     mode: AppMode.STUDENT,
-    personality: Personality.AMBIVERT, // Default
+    personality: Personality.INTROVERT, // Default to Introvert as requested
     completedSlides: []
   });
   const [showConfetti, setShowConfetti] = useState(false);

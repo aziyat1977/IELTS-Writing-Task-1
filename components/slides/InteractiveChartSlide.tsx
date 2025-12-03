@@ -53,41 +53,57 @@ const InteractiveChartSlide: React.FC<Props> = ({ type, data, title, onAction, p
     setCompletedIds(new Set());
     setActiveTab('intro');
 
-    // Generate Context-Aware Exercises
+    // Generate Context-Aware Exercises based on Title and Type
     const isProcess = type === 'process';
     const isMap = type === 'map';
+    const isPie = title.toLowerCase().includes('pie');
+
+    let introPrompt = "Introduction: Select the most precise academic verb.";
+    let introBefore = `The ${isProcess ? 'diagram' : isMap ? 'map' : 'chart'}`;
+    let introAfter = isProcess ? 'the linear stages in the production of the item.' : 'information regarding the changes.';
+    
+    // Customizing intro based on data content
+    if (title.includes('Chocolate')) {
+      introAfter = "the various stages involved in the commercial production of chocolate.";
+    } else if (title.includes('Village')) {
+      introAfter = "the development of Isola Village over a 24-year period.";
+    }
 
     const introExs: Exercise[] = [
       {
         id: 'i1',
         type: 'fill-blank',
-        prompt: 'Introduction: Select the most precise academic verb.',
-        beforeText: `The ${isProcess ? 'diagram' : isMap ? 'map' : 'chart'}`,
-        afterText: isProcess ? 'the linear stages in the production of the item.' : 'information regarding the changes.',
+        prompt: introPrompt,
+        beforeText: introBefore,
+        afterText: introAfter,
         options: shuffle([
-          { id: 'opt1', text: isProcess ? 'delineates' : 'illustrates', isCorrect: true },
+          { id: 'opt1', text: isProcess ? 'delineates' : isMap ? 'illustrates' : 'depicts', isCorrect: true },
           { id: 'opt2', text: 'talks about', isCorrect: false },
           { id: 'opt3', text: 'shows up', isCorrect: false }
         ])
       }
     ];
 
+    let overviewCorrect = "Overall, the chart shows...";
+    if (isProcess) overviewCorrect = "Overall, the process consists of several sequential steps, commencing with harvesting and culminating in the production of liquid chocolate.";
+    else if (isMap) overviewCorrect = "Overall, the village witnessed significant modernization, with farmland being replaced by residential and commercial infrastructure.";
+    else if (isPie) overviewCorrect = "Overall, Electronics accounted for the largest proportion of sales, while Sports represented the smallest segment.";
+    else overviewCorrect = "Overall, it is evident that Radio audiences peaked in the morning, whereas TV viewership was highest in the evening.";
+
     const overviewExs: Exercise[] = [
       {
         id: 'o1',
         type: 'mcq',
-        prompt: isProcess ? 'Overview: Identify the start and end.' : 'Overview: Identify the main trend.',
+        prompt: 'Overview: Identify the most accurate summary.',
         options: shuffle([
           { 
             id: 'opt1', 
-            text: isProcess 
-              ? 'Overall, there are several steps, beginning with raw collection and ending with the final product.' 
-              : 'Overall, it is clear that there were significant fluctuations, with most categories showing an upward trend.', 
+            text: overviewCorrect, 
             isCorrect: true 
           },
           { 
             id: 'opt2', 
-            text: 'It starts at 5 and ends at 100.', 
+            text: isProcess ? 'The process shows only two steps.' : 'There were no significant changes during this period.', 
             isCorrect: false 
           }
         ])
@@ -140,9 +156,9 @@ const InteractiveChartSlide: React.FC<Props> = ({ type, data, title, onAction, p
 
   const renderChart = () => {
     // Determine specific chart type from title
-    const isLine = title.includes('Line');
-    const isBar = title.includes('Bar');
-    const isPie = title.includes('Pie');
+    const isLine = title.toLowerCase().includes('line');
+    const isBar = title.toLowerCase().includes('bar');
+    const isPie = title.toLowerCase().includes('pie');
     
     return (
       <ResponsiveContainer width="100%" height="100%">
@@ -159,8 +175,8 @@ const InteractiveChartSlide: React.FC<Props> = ({ type, data, title, onAction, p
             <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12, fontWeight: 600}} dx={-10} />
             <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', padding: '16px', backgroundColor: 'rgba(255, 255, 255, 0.95)' }} />
             <Legend wrapperStyle={{ paddingTop: '30px' }} iconType="circle" />
-            <Area type="monotone" name="Variable A" dataKey="value1" stroke="#f59e0b" strokeWidth={3} fillOpacity={1} fill="url(#colorV1)" dot={{r: 4, fill: '#f59e0b', strokeWidth: 2, stroke: '#fff'}} />
-            <Area type="monotone" name="Variable B" dataKey="value2" stroke={personality === Personality.INTROVERT ? "#818cf8" : "#1e293b"} strokeWidth={3} fillOpacity={0} dot={{r: 4}} />
+            <Area type="monotone" name="Radio" dataKey="value1" stroke="#f59e0b" strokeWidth={3} fillOpacity={1} fill="url(#colorV1)" dot={{r: 4, fill: '#f59e0b', strokeWidth: 2, stroke: '#fff'}} />
+            <Area type="monotone" name="TV" dataKey="value2" stroke={personality === Personality.INTROVERT ? "#818cf8" : "#1e293b"} strokeWidth={3} fillOpacity={0} dot={{r: 4}} />
           </AreaChart>
         ) : isBar ? (
           <BarChart data={data as ChartDataPoint[]} margin={{ top: 20, right: 30, left: 20, bottom: 20 }} barGap={8}>
@@ -179,7 +195,7 @@ const InteractiveChartSlide: React.FC<Props> = ({ type, data, title, onAction, p
               cx="50%"
               cy="50%"
               innerRadius={60}
-              outerRadius={100}
+              outerRadius={120}
               fill="#8884d8"
               paddingAngle={5}
               dataKey="value1"
@@ -188,8 +204,8 @@ const InteractiveChartSlide: React.FC<Props> = ({ type, data, title, onAction, p
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip />
-            <Legend />
+            <Tooltip contentStyle={{ borderRadius: '12px', border: 'none' }} />
+            <Legend verticalAlign="bottom" height={36} />
           </PieChart>
         )}
       </ResponsiveContainer>
@@ -200,21 +216,31 @@ const InteractiveChartSlide: React.FC<Props> = ({ type, data, title, onAction, p
     const steps = data as ProcessStep[];
     return (
       <div className="h-full overflow-y-auto pr-2 scrollbar-thin">
-        <div className="flex flex-col items-center gap-4 py-4">
+        <div className="flex flex-col items-center gap-6 py-6">
           {steps.map((step, idx) => (
             <React.Fragment key={idx}>
-              <div className={`relative w-full p-4 rounded-xl border flex items-center gap-4 hover:scale-105 transition-transform cursor-default ${personality === Personality.INTROVERT ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200 shadow-sm'}`}>
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold flex-shrink-0 ${personality === Personality.INTROVERT ? 'bg-indigo-900 text-indigo-300' : 'bg-orange-100 text-orange-600'}`}>
+              <div className={`relative w-full max-w-md p-6 rounded-xl border flex items-center gap-6 hover:scale-105 transition-transform cursor-default group
+                 ${personality === Personality.INTROVERT ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200 shadow-lg'}`}>
+                
+                {/* Number Badge */}
+                <div className="absolute -left-3 -top-3 w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-bold shadow-md">
+                   {step.step}
+                </div>
+
+                <div className={`w-16 h-16 rounded-full flex items-center justify-center text-3xl font-bold flex-shrink-0 transition-colors
+                   ${personality === Personality.INTROVERT ? 'bg-indigo-900/50 text-indigo-300' : 'bg-orange-50 text-orange-600'}`}>
                   <i className={`fa-solid ${step.icon}`}></i>
                 </div>
                 <div>
-                  <div className="text-xs uppercase font-bold opacity-50 tracking-wider">Step {step.step}</div>
-                  <h4 className={`font-bold ${theme.textPrimary}`}>{step.label}</h4>
-                  <p className={`text-xs mt-1 ${theme.textSecondary}`}>{step.description}</p>
+                  <h4 className={`text-lg font-bold mb-1 ${theme.textPrimary}`}>{step.label}</h4>
+                  <p className={`text-sm leading-relaxed ${theme.textSecondary}`}>{step.description}</p>
                 </div>
               </div>
+              
               {idx < steps.length - 1 && (
-                <i className={`fa-solid fa-arrow-down text-2xl animate-bounce ${personality === Personality.INTROVERT ? 'text-slate-700' : 'text-slate-300'}`}></i>
+                <div className="h-8 w-0.5 bg-slate-300 relative">
+                  <i className={`fa-solid fa-chevron-down absolute -bottom-2 -left-1.5 text-slate-300`}></i>
+                </div>
               )}
             </React.Fragment>
           ))}
@@ -225,43 +251,81 @@ const InteractiveChartSlide: React.FC<Props> = ({ type, data, title, onAction, p
 
   const renderMap = () => {
     const mapData = data as MapData;
+    // Helper to render grid cells based on features
+    const renderGrid = (year: number) => {
+      // Create a 3x3 grid simulation
+      const cells = [
+        { id: "North-West", bg: "bg-transparent" }, { id: "North", bg: "bg-transparent" }, { id: "North-East", bg: "bg-transparent" },
+        { id: "West", bg: "bg-transparent" }, { id: "Center", bg: "bg-transparent" }, { id: "East", bg: "bg-transparent" },
+        { id: "South-West", bg: "bg-transparent" }, { id: "South", bg: "bg-transparent" }, { id: "South-East", bg: "bg-transparent" },
+      ];
+
+      return (
+         <div className="grid grid-cols-3 grid-rows-3 gap-2 h-64 w-full bg-slate-100 rounded-lg p-2 border border-slate-200">
+            {cells.map((cell, idx) => {
+               // Find feature for this location
+               // Simplified logic: mapping 'North' to index 1, etc.
+               let content = null;
+               
+               mapData.features.forEach(feat => {
+                 let match = false;
+                 if (cell.id.includes(feat.location)) match = true;
+                 // Specific overrides for the demo data
+                 if (feat.location === "North" && cell.id === "North") match = true;
+                 if (feat.location === "South" && cell.id === "South") match = true;
+
+                 // Check existence logic
+                 if (match) {
+                    const existsInY1 = year === mapData.year1 && (feat.status === 'unchanged' || feat.status === 'removed' || feat.status === 'expanded');
+                    const existsInY2 = year === mapData.year2 && (feat.status === 'unchanged' || feat.status === 'new' || feat.status === 'expanded');
+                    
+                    if (existsInY1 || existsInY2) {
+                       let icon = "fa-circle";
+                       let color = "bg-slate-300";
+                       let label = feat.name;
+
+                       if (feat.name.includes("Farm")) { icon = "fa-wheat"; color = "bg-green-200 text-green-800"; }
+                       if (feat.name.includes("Housing")) { icon = "fa-house"; color = "bg-orange-200 text-orange-800"; }
+                       if (feat.name.includes("School")) { icon = "fa-graduation-cap"; color = "bg-blue-200 text-blue-800"; }
+                       if (feat.name.includes("Market")) { icon = "fa-store"; color = "bg-yellow-200 text-yellow-800"; }
+                       if (feat.name.includes("Port")) { icon = "fa-anchor"; color = "bg-cyan-200 text-cyan-800"; }
+                       if (feat.name.includes("Fish")) { icon = "fa-fish"; color = "bg-teal-200 text-teal-800"; }
+
+                       content = (
+                         <div className={`w-full h-full rounded ${color} flex flex-col items-center justify-center p-1 shadow-sm text-center`}>
+                           <i className={`fa-solid ${icon} text-lg mb-1`}></i>
+                           <span className="text-[8px] font-bold leading-none">{label}</span>
+                         </div>
+                       );
+                    }
+                 }
+               });
+
+               return <div key={idx} className="w-full h-full rounded border border-slate-200/50 bg-white/50">{content}</div>;
+            })}
+         </div>
+      );
+    };
+
     return (
-      <div className="h-full flex flex-col gap-4">
-        {[mapData.year1, mapData.year2].map((year, yearIdx) => (
-          <div key={year} className={`flex-1 relative rounded-xl border overflow-hidden p-4 ${personality === Personality.INTROVERT ? 'bg-slate-800 border-slate-700' : 'bg-green-50/50 border-green-100'}`}>
-            <span className="absolute top-2 left-3 font-bold bg-white/80 px-2 py-1 rounded text-xs shadow-sm text-black">Year {year}</span>
-            
-            {/* Simple Grid Map Simulation */}
-            <div className="grid grid-cols-3 grid-rows-2 gap-2 h-full mt-4">
-              {mapData.features.map((feat, idx) => {
-                // Determine if this feature exists in this year
-                const exists = yearIdx === 1 || feat.status === 'unchanged' || feat.status === 'removed';
-                const isNewInYear2 = yearIdx === 1 && feat.status === 'new';
-                const isRemovedInYear2 = yearIdx === 1 && feat.status === 'removed';
-                
-                if (!exists || isRemovedInYear2) return <div key={idx} className="bg-transparent border-2 border-dashed border-slate-300/20 rounded"></div>;
-
-                let color = "bg-slate-400";
-                if (feat.name.includes("Farm")) color = "bg-green-300";
-                if (feat.name.includes("House")) color = "bg-orange-300";
-                if (feat.name.includes("School")) color = "bg-blue-300";
-                if (feat.name.includes("Port")) color = "bg-cyan-300";
-
-                return (
-                  <div key={idx} className={`${color} rounded-lg flex flex-col items-center justify-center text-center p-1 shadow-sm relative group`}>
-                     <i className="fa-solid fa-location-dot text-black/20 text-3xl mb-1"></i>
-                     <span className="text-[10px] font-bold text-slate-900 leading-tight">{feat.name}</span>
-                     {yearIdx === 1 && feat.status !== 'unchanged' && (
-                       <span className={`absolute -top-1 -right-1 text-[8px] font-bold text-white px-1 rounded ${feat.status === 'expanded' ? 'bg-blue-600' : 'bg-red-500'}`}>
-                         {feat.status === 'expanded' ? '+' : 'NEW'}
-                       </span>
-                     )}
-                  </div>
-                )
-              })}
-            </div>
+      <div className="h-full flex flex-col gap-6 overflow-y-auto">
+        <div className="flex-1">
+          <div className="font-bold mb-2 flex justify-between items-center">
+             <span>Year {mapData.year1}</span>
+             <span className="text-xs text-slate-400">Past</span>
           </div>
-        ))}
+          {renderGrid(mapData.year1)}
+        </div>
+        <div className="flex justify-center">
+           <i className="fa-solid fa-arrow-down text-2xl opacity-20"></i>
+        </div>
+        <div className="flex-1">
+          <div className="font-bold mb-2 flex justify-between items-center">
+             <span>Year {mapData.year2}</span>
+             <span className="text-xs text-slate-400">Present</span>
+          </div>
+          {renderGrid(mapData.year2)}
+        </div>
       </div>
     );
   };
@@ -305,7 +369,7 @@ const InteractiveChartSlide: React.FC<Props> = ({ type, data, title, onAction, p
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 flex-1 min-h-[500px]">
         
         {/* Left: Enhanced Visuals */}
-        <div className={`flex flex-col relative overflow-hidden group p-8 ${theme.cardBg} ${theme.radius} h-[500px]`}>
+        <div className={`flex flex-col relative overflow-hidden group p-8 ${theme.cardBg} ${theme.radius} h-[600px] xl:h-auto`}>
           <div className="flex-1 z-10 relative h-full">
             {type === 'process' ? renderProcess() : type === 'map' ? renderMap() : renderChart()}
           </div>

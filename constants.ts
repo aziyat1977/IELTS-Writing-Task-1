@@ -5,15 +5,19 @@ export const INITIAL_XP = 0;
 export const LEVEL_THRESHOLD = 100;
 
 // AUTHENTIC MOCK DATASETS
+
+// 1. Line Graph: Radio & TV Audiences (UK)
 const LINE_DATA_UK = [
-  { name: '6am', value1: 5, value2: 2 },
-  { name: '10am', value1: 25, value2: 8 },
-  { name: '2pm', value1: 45, value2: 15 },
-  { name: '6pm', value1: 55, value2: 60 },
-  { name: '10pm', value1: 30, value2: 40 },
-  { name: '2am', value1: 5, value2: 5 },
+  { name: '6am', value1: 8, value2: 5 },
+  { name: '9am', value1: 25, value2: 12 },
+  { name: '12pm', value1: 15, value2: 20 },
+  { name: '3pm', value1: 12, value2: 18 },
+  { name: '6pm', value1: 10, value2: 45 },
+  { name: '9pm', value1: 5, value2: 38 },
+  { name: '12am', value1: 2, value2: 5 },
 ];
 
+// 2. Bar Chart: Consumer Spend on Luxury Goods
 const BAR_DATA_LUXURY = [
   { name: 'USA', value1: 450, value2: 300 },
   { name: 'China', value1: 300, value2: 550 },
@@ -21,6 +25,7 @@ const BAR_DATA_LUXURY = [
   { name: 'Japan', value1: 200, value2: 220 },
 ];
 
+// 3. Pie Chart: Online Sales by Sector
 const PIE_DATA_SALES = [
   { name: 'Electronics', value1: 45 },
   { name: 'Fashion', value1: 25 },
@@ -28,15 +33,17 @@ const PIE_DATA_SALES = [
   { name: 'Sports', value1: 10 },
 ];
 
+// 4. Process: Production of Chocolate
 const PROCESS_DATA_CHOCOLATE = [
-  { step: 1, label: "Harvesting", description: "Cocoa pods are harvested from cacao trees grown in tropical regions.", icon: "fa-leaf" },
-  { step: 2, label: "Fermenting", description: "Beans are removed and fermented for 5-7 days to develop flavor.", icon: "fa-flask" },
-  { step: 3, label: "Drying", description: "Beans are spread in the sun to dry completely.", icon: "fa-sun" },
-  { step: 4, label: "Roasting", description: "Beans are roasted at high temperatures (120°C).", icon: "fa-fire-burner" },
+  { step: 1, label: "Harvesting", description: "Ripe cocoa pods are harvested from cacao trees grown in tropical regions.", icon: "fa-leaf" },
+  { step: 2, label: "Fermentation", description: "Beans are removed and fermented for 5-7 days to develop flavor.", icon: "fa-flask" },
+  { step: 3, label: "Drying", description: "Beans are spread in the sun to dry completely before shipping.", icon: "fa-sun" },
+  { step: 4, label: "Roasting", description: "Beans are roasted at high temperatures (120°C) to enhance aroma.", icon: "fa-fire-burner" },
   { step: 5, label: "Crushing", description: "Outer shells are removed to extract the inner 'nibs'.", icon: "fa-hammer" },
-  { step: 6, label: "Liquefaction", description: "Nibs are ground into liquid chocolate liquor.", icon: "fa-glass-water" },
+  { step: 6, label: "Liquefaction", description: "Nibs are ground under pressure into liquid chocolate liquor.", icon: "fa-glass-water" },
 ];
 
+// 5. Map: Isola Village (2000 vs 2024)
 const MAP_DATA_VILLAGE: MapData = {
   year1: 2000,
   year2: 2024,
@@ -45,7 +52,8 @@ const MAP_DATA_VILLAGE: MapData = {
     { name: "Housing Estate", location: "North", status: "new" },
     { name: "Market Square", location: "Center", status: "unchanged" },
     { name: "Local School", location: "East", status: "expanded" },
-    { name: "Ferry Port", location: "South (Sea)", status: "new" }
+    { name: "Ferry Port", location: "South", status: "new" },
+    { name: "Fishing Docs", location: "South", status: "removed" }
   ]
 };
 
@@ -202,7 +210,7 @@ export const SLIDES: SlideData[] = [
   // Module 3: Authentic Practice
   { 
     id: 6, 
-    title: "Line: TV Audiences (UK)", 
+    title: "Line: TV vs Radio (UK)", 
     category: "Module 3: Practice Bank", 
     icon: "fa-chart-line", 
     type: "chart",
